@@ -30,9 +30,10 @@ def edit_review(request, id, review_id):
 def index(request):
     search_term = request.GET.get('search')
     if search_term:
-        movies = Movie.objects.filter(name__icontains=search_term)
+        movies = Movie.objects.filter(name__icontains=search_term, amount_left__gt=0) | Movie.objects.filter(name__icontains=search_term, amount_left__isnull=True)
     else:
-        movies = Movie.objects.all()
+        movies = Movie.objects.filter(amount_left__gt=0) | Movie.objects.filter(amount_left__isnull=True)
+    
     template_data = {}
     template_data['title'] = 'Movies'
     template_data['movies'] = movies

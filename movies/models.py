@@ -7,6 +7,15 @@ class Movie(models.Model):
     price = models.IntegerField()
     description = models.TextField()
     image = models.ImageField(upload_to='movie_images/')
+    amount_left = models.PositiveIntegerField(null=True, blank=True, default=None)
+    
+    def is_available(self):
+        return self.amount_left is None or self.amount_left > 0
+    
+    def purchase(self):
+        if self.amount_left is not None and self.amount_left > 0:
+            self.amount_left -= 1
+            self.save()
     
     def __str__(self):
         return str(self.id) + ' - ' + self.name

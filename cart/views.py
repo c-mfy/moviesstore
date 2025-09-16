@@ -49,6 +49,15 @@ def purchase(request):
     order.save()
     
     for movie in movies_in_cart:
+        quantity = int(cart[str(movie.id)])
+        
+        if movie.amount_left is not None:
+            if movie.amount_left >= quantity:
+                movie.amount_left -= quantity
+            else:
+                movie.amount_left = 0
+            movie.save()
+        
         item = Item()
         item.movie = movie
         item.price = movie.price

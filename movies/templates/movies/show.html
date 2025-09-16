@@ -13,14 +13,32 @@
           <p>
             <b>Price:</b> ${{ template_data.movie.price }}
           </p>
-          <p class="card-text">
+
+          <!-- ✅ Stock info -->
+          {% if template_data.movie.amount_left is None %}
+            <p><b>Available:</b> Unlimited</p>
+          {% elif template_data.movie.amount_left > 0 %}
+            <p><b>Stock left:</b> {{ template_data.movie.amount_left }}</p>
+          {% else %}
+            <p class="text-danger"><b>Sold Out</b></p>
+          {% endif %}
+
+          <!-- ✅ Cart form (only if available) -->
+          {% if template_data.movie.amount_left is None or template_data.movie.amount_left > 0 %}
             <form method="post" action="{% url 'cart.add' id=template_data.movie.id %}">
+              {% csrf_token %}
               <div class="row">
-                {% csrf_token %}
                 <div class="col-auto">
                   <div class="input-group col-auto">
                     <div class="input-group-text">Quantity</div>
-                    <input type="number" min="1" max="10" class="form-control quantity-input" name="quantity" value="1" />
+                    <input 
+                      type="number"
+                      min="1"
+                      max="{% if template_data.movie.amount_left %}{{ template_data.movie.amount_left }}{% else %}10{% endif %}"
+                      class="form-control quantity-input"
+                      name="quantity"
+                      value="1"
+                    />
                   </div>
                 </div>
                 <div class="col-auto">
@@ -28,8 +46,9 @@
                 </div>
               </div>
             </form>
-          </p>
-          <h2>Reviews</h2>
+          {% endif %}
+
+          <h2 class="mt-4">Reviews</h2>
           <hr />
           <ul class="list-group">
             {% for review in template_data.reviews %}
@@ -42,8 +61,11 @@
                   <a class="btn btn-danger" href="{% url 'movies.delete_review' id=template_data.movie.id review_id=review.id %}">Delete</a>
                 {% endif %}
               </li>
+            {% empty %}
+              <li class="list-group-item">No reviews yet.</li>
             {% endfor %}
           </ul>
+
           {% if user.is_authenticated %}
             <div class="container mt-4">
               <div class="row justify-content-center">
